@@ -1,0 +1,33 @@
+version: '3'
+
+env:
+  SCALE: 1
+
+tasks:
+  docker-compose-config:
+    cmds:
+      - docker compose config
+
+  deploy:
+    cmds:
+      - task: start
+      - . ./deploy.sh && zero_downtime_deploy zrdt-backend-nginx zrdt-backend-api $SCALE 4001
+      - task: ps
+
+  start:
+    cmds:
+      - docker compose up -d --no-deps --no-recreate --scale zrdt-backend-api=$SCALE zrdt-backend-api
+      - docker compose up -d --no-deps --no-recreate zrdt-backend-nginx
+      - task: ps
+      
+  stop:
+    cmds:
+      - docker compose down --remove-orphans
+
+  restart:
+    cmds:
+      - task: deploy
+
+  ps:
+    cmds:
+      - docker compose ps
