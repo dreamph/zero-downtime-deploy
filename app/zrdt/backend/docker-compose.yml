@@ -1,0 +1,30 @@
+name: zrdt-backend
+
+services:
+  zrdt-backend-api:
+    image: zrdt-backend-api
+    restart: always
+
+  zrdt-backend-nginx:
+    container_name: zrdt-backend-nginx
+    image: zrdt-backend-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "3001:80"
+    restart: always
+    command:
+      [
+        "./wait-for-it.sh",
+        "zrdt-backend-api:4001",
+        "--timeout=0",
+        "--",
+        "nginx",
+        "-g",
+        "daemon off;",
+      ]
+
+networks:
+  default:
+    name: app-network
+    external: true

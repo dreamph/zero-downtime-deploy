@@ -1,0 +1,25 @@
+FROM golang:1.22.2-alpine AS builder
+WORKDIR /app
+
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
+ADD . /app
+
+#RUN go mod tidy
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o main main.go
+
+
+FROM alpine:latest AS production
+WORKDIR /app
+
+RUN apk add --no-cache tzdata openssl
+ENV TZ=Asia/Bangkok
+
+COPY --from=builder /app/main /app/main
+
+CMD ["./main"]
+
+EXPOSE 4001

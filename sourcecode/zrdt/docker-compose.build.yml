@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+
+  zrdt-backend-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    image: zrdt-backend-api
+
+  zrdt-backend-nginx:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    image: zrdt-backend-nginx
+
+networks:
+  default:
+    name: app-network
+    external: true

@@ -1,0 +1,47 @@
+version: '3'
+
+env:
+  SCALE: 1
+  COMPOSE_ENV_FILES: ../.env
+dotenv: ['../.env']
+
+tasks:
+  docker-compose-config:
+    requires:
+      vars: [COMPOSE_ENV_FILES]
+    cmds:
+      - COMPOSE_ENV_FILES=$COMPOSE_ENV_FILES docker compose config
+
+  deploy:
+    requires:
+      vars: [COMPOSE_ENV_FILES,SCALE]
+    cmds:
+      - task: start
+   #   - COMPOSE_ENV_FILES=$COMPOSE_ENV_FILES docker compose up -d --no-deps --no-recreate zrdt-backend-nginx
+      - . ./deploy.sh && COMPOSE_ENV_FILES=$COMPOSE_ENV_FILES zero_downtime_deploy zrdt-backend-nginx zrdt-backend-api $SCALE 4001
+      - task: ps
+
+
+  start:
+    requires:
+      vars: [COMPOSE_ENV_FILES,SCALE]
+    cmds:
+      - COMPOSE_ENV_FILES=$COMPOSE_ENV_FILES docker compose up -d --no-deps --no-recreate --scale zrdt-backend-api=$SCALE zrdt-backend-api
+      - COMPOSE_ENV_FILES=$COMPOSE_ENV_FILES docker compose up -d --no-deps --no-recreate zrdt-backend-nginx
+      - task: ps
+      
+  stop:
+    requires:
+      vars: [COMPOSE_ENV_FILES,SCALE]
+    cmds:
+      - COMPOSE_ENV_FILES=$COMPOSE_ENV_FILES docker compose down --remove-orphans
+
+  restart:
+    cmds:
+      - task: deploy
+
+  ps:
+    requires:
+      vars: [COMPOSE_ENV_FILES,SCALE]
+    cmds:
+      - COMPOSE_ENV_FILES=$COMPOSE_ENV_FILES docker compose ps
