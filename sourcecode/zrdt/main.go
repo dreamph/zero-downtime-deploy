@@ -10,17 +10,10 @@ import (
 	fiberrecover "github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"os"
-	"time"
 )
 
 func main() {
-	cfg := fiber.Config{
-		BodyLimit:    fiber.DefaultBodyLimit,
-		ErrorHandler: fiber.DefaultErrorHandler,
-		ReadTimeout:  time.Second * 30,
-	}
-
-	app := fiber.New(cfg)
+	app := fiber.New()
 	app.Use(requestid.New())
 	app.Use(cors.New())
 	app.Use(logger.New())
